@@ -6,9 +6,10 @@
 #include<stdlib.h> //exit(0);
 #include<arpa/inet.h>
 #include<sys/socket.h>
- 
+#include<unistd.h>
+
 #define SERVER "127.0.0.1"
-#define BUFLEN 512  //Max length of buffer
+#define BUFLEN 1024 //Max length of buffer
 #define PORT 8888   //The port on which to send data
  
 void die(char *s)
@@ -20,9 +21,9 @@ void die(char *s)
 int main(void)
 {
     struct sockaddr_in si_other;
-    int s, i, slen=sizeof(si_other);
-    char buf[BUFLEN];
-    char message[BUFLEN];
+    int s;
+    unsigned int slen=sizeof(si_other);
+    //char buf[BUFLEN];
  
     if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
     {
@@ -39,28 +40,19 @@ int main(void)
         exit(1);
     }
  
-    while(1)
+    // HERE
+    // HERE
+
+    int tosend = 696969;
+     
+    //send the buf
+    if (sendto(s, tosend, sizeof(tosend) , 0 , (struct sockaddr *) &si_other, slen)==-1)
     {
-        printf("Enter message : ");
-        gets(message);
-         
-        //send the message
-        if (sendto(s, message, strlen(message) , 0 , (struct sockaddr *) &si_other, slen)==-1)
-        {
-            die("sendto()");
-        }
-         
-        //receive a reply and print it
-        //clear the buffer by filling null, it might have previously received data
-        memset(buf,'\0', BUFLEN);
-        //try to receive some data, this is a blocking call
-        if (recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen) == -1)
-        {
-            die("recvfrom()");
-        }
-         
-        puts(buf);
+        die("sendto()");
     }
+         
+
+
  
     close(s);
     return 0;
