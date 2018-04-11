@@ -8,15 +8,12 @@
 #include<sys/socket.h>
 #include<unistd.h>
 
-#define SERVER "127.0.0.1"
+#define SERVER "147.32.216.27"
 #define BUFLEN 1024 //Max length of buffer
-#define PORT 8888   //The port on which to send data
+#define PORT 55888   //The port on which to send data
  
-void die(char *s)
-{
-    perror(s);
-    exit(1);
-}
+void die(char *s);
+int getFileSize(FILE* fp);
  
 int main(void)
 {
@@ -43,17 +40,50 @@ int main(void)
     // HERE
     // HERE
 
-    int tosend = 696969;
+    char* filename = "in.txt";
+    int filename_len = strlen(filename);
+    if (sendto(s, &filename_len, sizeof(filename_len), 0 , (struct sockaddr *) &si_other, slen)==-1)
+    {
+        die("Failed to send filename lenght\n");
+    }
+
+    if (sendto(s, filename, filename_len, 0 , (struct sockaddr *) &si_other, slen)==-1)
+    {
+        die("Failed to send filename\n");
+    }
+
+
+    FILE* fp = fopen(filename, "rb");
+    if(fp == NULL){
+        die("Failed to open file\n");
+    }
+
+    int filesize = getFileSize(fp);
      
     //send the buf
-    if (sendto(s, tosend, sizeof(tosend) , 0 , (struct sockaddr *) &si_other, slen)==-1)
+    if (sendto(s, &filesize, sizeof(filesize) , 0 , (struct sockaddr *) &si_other, slen)==-1)
     {
         die("sendto()");
     }
          
 
 
- 
+    fclose(fp);
     close(s);
     return 0;
+}
+
+void die(char *s)
+{
+    perror(s);
+    exit(1);
+}
+
+// return filesize of opened file fp
+int getFileSize(FILE* fp)
+{
+    fseek(fp, 0L, SEEK_END);
+    int size = ftell(fp);
+    rewind(fp);
+    return size;
 }
