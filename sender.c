@@ -11,7 +11,9 @@
 #define SERVER "147.32.216.27"
 #define BUFLEN 1024 //Max length of buffer
 #define PORT 55888   //The port on which to send data
- 
+#define FILENAME "in.txt"
+
+
 void die(char *s);
 int getFileSize(FILE* fp);
  
@@ -40,7 +42,7 @@ int main(void)
     // HERE
     // HERE
 
-    char* filename = "in.txt";
+    char* filename = FILENAME;
     int filename_len = strlen(filename);
     if (sendto(s, &filename_len, sizeof(filename_len), 0 , (struct sockaddr *) &si_other, slen)==-1)
     {
