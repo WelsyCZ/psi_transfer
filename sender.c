@@ -11,7 +11,7 @@
 #define SERVER "147.32.216.27"
 #define BUFLEN 1024 //Max length of buffer
 #define PORT 55888   //The port on which to send data
-#define FILENAME "in.txt"
+#define FILENAME "obrazek2.jpg"
 
 
 void die(char *s);
@@ -91,6 +91,8 @@ int main(void)
             }
             tracker = 0;
         }
+        printf("Sending %d / %d\n", tracker, filesize);
+        sleep(0.3);
     }
 
     printf("File sent!\n");
