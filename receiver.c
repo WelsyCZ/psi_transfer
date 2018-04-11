@@ -8,7 +8,7 @@
 #include<sys/socket.h>
 #include<unistd.h>
  
-#define BUFLEN 512  //Max length of buffer
+#define BUFLEN 1024  //Max length of buffer
 #define PORT 8888   //The port on which to listen for incoming data
  
 void die(char *s)
@@ -21,7 +21,9 @@ int main(void)
 {
     struct sockaddr_in si_me, si_other;
      
-    int s, i, slen = sizeof(si_other) , recv_len;
+    int s, i;
+    ssize_t recv_len;
+    unsigned int slen = sizeof(si_other);
     //char buf[BUFLEN];
      
     //create a UDP socket
