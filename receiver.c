@@ -21,7 +21,7 @@ int main(void)
     struct sockaddr_in si_me, si_other;
      
     int s, i, slen = sizeof(si_other) , recv_len;
-    char buf[BUFLEN];
+    //char buf[BUFLEN];
      
     //create a UDP socket
     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
@@ -43,27 +43,20 @@ int main(void)
     }
      
     //keep listening for data
-    while(1)
+    
+    printf("Waiting for data...");
+        
+    //try to receive some data, this is a blocking call
+    if ((recv_len = recvfrom(s, &i, sizeof(i), 0, (struct sockaddr *) &si_other, &slen)) == -1)
     {
-        printf("Waiting for data...");
-        fflush(stdout);
-         
-        //try to receive some data, this is a blocking call
-        if ((recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen)) == -1)
-        {
-            die("recvfrom()");
-        }
-         
-        //print details of the client/peer and the data received
-        printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-        printf("Data: %s\n" , buf);
-         
-        //now reply the client with the same data
-        if (sendto(s, buf, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1)
-        {
-            die("sendto()");
-        }
+        die("recvfrom()");
     }
+        
+    //print details of the client/peer and the data received
+    printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
+    printf("Data: %d\n" , i);
+         
+    
  
     close(s);
     return 0;
