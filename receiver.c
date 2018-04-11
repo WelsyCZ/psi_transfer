@@ -9,19 +9,25 @@
 #include <unistd.h>
  
 #define BUFLEN 1024  //Max length of buffer
-#define PORT 8888   //The port on which to listen for incoming data
+#define PORT 55888   //The port on which to listen for incoming data
+#define ADDTOFILENAME "new_"
  
 void die(char *s)
 {
     perror(s);
     exit(1);
 }
+
+char* stradd(const char* a, const char* b);
+
  
 int main(void)
 {
     struct sockaddr_in si_me, si_other;
     unsigned int slen = sizeof(si_other);
-    int s, i, recv_len;
+    int s,filesize, recv_len, filename_len;
+    char *filename;
+    char *newfilename;
     //char buf[BUFLEN];
      
     //create a UDP socket
@@ -47,19 +53,48 @@ int main(void)
    
     printf("Waiting for data...");
     fflush(stdout);
-        
-    //try to receive some data, this is a blocking call
-    if ((recv_len = recvfrom(s, &i, sizeof(i), 0, (struct sockaddr *) &si_other, &slen)) == -1)
+
+
+    //try to receive length of filename
+    if ((recv_len = recvfrom(s, &filename_len, sizeof(filename_len), 0, (struct sockaddr *) &si_other, &slen)) == -1)
+    {
+        die("recvfrom()");
+    } 
+    
+  //prepare filename
+    filename = (char *) malloc(sizeof(char)* filename_len);    
+    //try to receive filename
+    if ((recv_len = recvfrom(s, filename, filename_len, 0, (struct sockaddr *) &si_other, &slen)) == -1)
+    {
+        die("recvfrom()");
+    }
+
+
+    newfilename = stradd(filename, ADDTOFILENAME);
+    //try to receive size of file
+    if ((recv_len = recvfrom(s, &filesize, sizeof(filesize), 0, (struct sockaddr *) &si_other, &slen)) == -1)
     {
         die("recvfrom()");
     }
         
     //print details of the client/peer and the data received
     printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-    printf("Data: %d\n" , i);
+    printf("Filesize: %d\n" , filesize);
+    printf("Filenamelen: %d\n" , filename_len);
+    printf("Filename: %s\n", filename);
+    printf("Saved as: %s\n", newfilename);
          
     
- 
+    free(filename);
+    free(newfilename);
     close(s);
     return 0;
+}
+
+
+char* stradd(const char* a, const char* b){
+    size_t len = strlen(a) + strlen(b);
+    char *ret = (char*)malloc(len * sizeof(char) + 1);
+    *ret = '\0';
+    return strcat(strcat(ret, b) ,a);
 }
