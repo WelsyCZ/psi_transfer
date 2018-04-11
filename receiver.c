@@ -1,12 +1,12 @@
 /*
     Simple udp server
 */
-#include<stdio.h> //printf
-#include<string.h> //memset
-#include<stdlib.h> //exit(0);
-#include<arpa/inet.h>
-#include<sys/socket.h>
-#include<unistd.h>
+#include <stdio.h> //printf
+#include <string.h> //memset
+#include <stdlib.h> //exit(0);
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <unistd.h>
  
 #define BUFLEN 1024  //Max length of buffer
 #define PORT 8888   //The port on which to listen for incoming data
@@ -20,10 +20,8 @@ void die(char *s)
 int main(void)
 {
     struct sockaddr_in si_me, si_other;
-     
-    int s, i;
-    ssize_t recv_len;
     unsigned int slen = sizeof(si_other);
+    int s, i, recv_len;
     //char buf[BUFLEN];
      
     //create a UDP socket
@@ -46,8 +44,9 @@ int main(void)
     }
      
     //keep listening for data
-    
+   
     printf("Waiting for data...");
+    fflush(stdout);
         
     //try to receive some data, this is a blocking call
     if ((recv_len = recvfrom(s, &i, sizeof(i), 0, (struct sockaddr *) &si_other, &slen)) == -1)
