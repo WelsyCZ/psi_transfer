@@ -22,7 +22,7 @@ int main(void)
     struct sockaddr_in si_other;
     int s;
     unsigned int slen=sizeof(si_other);
-    //char buf[BUFLEN];
+    char buf[BUFLEN];
  
     if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
     {
@@ -65,11 +65,35 @@ int main(void)
     //send the buf
     if (sendto(s, &filesize, sizeof(filesize) , 0 , (struct sockaddr *) &si_other, slen)==-1)
     {
-        die("sendto()");
+        die("Failed to send filesize");
     }
-         
 
+    int tracker = filesize;
+    while(tracker > 0)
+    {
+        if(tracker > BUFLEN){
+            if(fread(buf, BUFLEN, 1, fp) == 0) {
+                die("error while reading file\n");
+            }
+            if (sendto(s, buf, BUFLEN, 0 , (struct sockaddr *) &si_other, slen)==-1)
+            {
+                die("Failed to send file");
+            }
+            tracker -= BUFLEN;
+        }
+        else{
+            if(fread(buf, tracker, 1, fp) == 0) {
+                die("error while reading end of file\n");
+            }
+            if (sendto(s, buf, tracker, 0, (struct sockaddr *) &si_other, slen)==-1)
+            {
+                die("Failed to send filesize");
+            }
+            tracker = 0;
+        }
+    }
 
+    printf("File sent!\n");
     fclose(fp);
     close(s);
     return 0;
