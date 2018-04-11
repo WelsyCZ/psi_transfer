@@ -25,10 +25,11 @@ int main(void)
 {
     struct sockaddr_in si_me, si_other;
     unsigned int slen = sizeof(si_other);
-    int s,filesize, recv_len, filename_len;
+    int s,filesize, recv_len, filename_len, fsize_tracker;
     char *filename;
     char *newfilename;
-    //char buf[BUFLEN];
+    char buf[BUFLEN];
+    FILE *fp;
      
     //create a UDP socket
     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
@@ -61,7 +62,7 @@ int main(void)
         die("recvfrom()");
     } 
     
-  //prepare filename
+    //prepare filename
     filename = (char *) malloc(sizeof(char)* filename_len);    
     //try to receive filename
     if ((recv_len = recvfrom(s, filename, filename_len, 0, (struct sockaddr *) &si_other, &slen)) == -1)
@@ -69,12 +70,39 @@ int main(void)
         die("recvfrom()");
     }
 
-
+    //prepare new filename
     newfilename = stradd(filename, ADDTOFILENAME);
     //try to receive size of file
     if ((recv_len = recvfrom(s, &filesize, sizeof(filesize), 0, (struct sockaddr *) &si_other, &slen)) == -1)
     {
         die("recvfrom()");
+    }
+    //prepare file for saving data
+    fp = fopen(newfilename, "wb");
+    fsize_tracker = filesize;
+
+     while(fsize_tracker > 0)
+    {
+        
+        if(fsize_tracker >= BUFLEN) {
+            recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen);
+            if(recv_len == -1){
+                die("Receiving file error");
+            }    
+            if(fwrite(buf, BUFLEN, 1, fp) == 0){
+                die("fwrite fail");
+            }
+            fsize_tracker -= BUFLEN;
+        } else {
+            recv_len = recvfrom(s, buf, fsize_tracker, 0, (struct sockaddr *) &si_other, &slen);
+            if(recv_len == -1) {
+                die("Receiving file error");
+                }    
+            if(fwrite(buf, fsize_tracker, 1, fp) == 0){
+                die("fwrite fail");
+            }
+            fsize_tracker = 0;
+        }
     }
         
     //print details of the client/peer and the data received
@@ -83,11 +111,13 @@ int main(void)
     printf("Filenamelen: %d\n" , filename_len);
     printf("Filename: %s\n", filename);
     printf("Saved as: %s\n", newfilename);
+    printf("Transfer completed\n");
          
     
     free(filename);
     free(newfilename);
     close(s);
+    fclose(fp);
     return 0;
 }
 
