@@ -12,5 +12,7 @@
     },
     "files.insertFinalNewline": true,
     "workbench.iconTheme": "vscode-great-icons",
+    "telemetry.enableCrashReporter": false,
+    "telemetry.enableTelemetry": false,
 
 }
