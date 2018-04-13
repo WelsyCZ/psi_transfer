@@ -1,0 +1,16 @@
+{
+    "terminal.explorerKind": "external",
+    "git.confirmSync": false,
+    "git.autofetch": true,
+    "git.enableSmartCommit": true,
+    "editor.fontSize": 15,
+    "editor.cursorWidth": 1,
+    "editor.quickSuggestions": {
+        "other": true,
+        "comments": true,
+        "strings": true
+    },
+    "files.insertFinalNewline": true,
+    "workbench.iconTheme": "vscode-great-icons",
+
+}
